@@ -1,0 +1,8 @@
+---
+# This playbook installs BitNami Redmine servers.
+
+- hosts: redmine-servers
+  sudo: yes
+  roles:
+    - expect
+    - bitnami

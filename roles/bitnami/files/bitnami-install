@@ -1,0 +1,44 @@
+#!/usr/bin/expect --
+if {$argc != 3} {
+  puts "Usage: $argv0 {installer} {optionfile} {password}"
+  exit 1
+}
+set timeout -1
+set installer  [lindex $argv 0]
+set optionfile [lindex $argv 1]
+set password   [lindex $argv 2]
+if {$password == ""} {
+  puts "Error: password is not specified."
+  exit 1
+}
+spawn sudo $installer --optionfile $optionfile
+while {1} {
+  expect {
+    "Password *:" {
+      send "$password\n"
+    }
+    "Please confirm your password *:" {
+      send "$password\n"
+    }
+    "Please choose an option ?4] :" {
+      send "9\n"
+    }
+    "Do you want to continue? ?Y/n]:" {
+      send "\n"
+    }
+    "Launch Redmine application. ?Y/n]:" {
+      send "n\n"
+    }
+    "Press ?Enter] to continue:" {
+      send "\n"
+      break
+    }
+    "] :" {
+      send "\n"
+    }
+    "]:" {
+      send "\n"
+    }
+  }
+}
+interact

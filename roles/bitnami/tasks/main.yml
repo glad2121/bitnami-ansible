@@ -1,0 +1,40 @@
+---
+- name: copy installer
+  copy: src={{item}} dest=~/tmp/ mode='u+x'
+  with_items:
+    - '/vagrant/downloads/{{bitnami_installer}}'
+    - bitnami-install
+
+- name: copy install optionfile
+  copy: src='{{bitnami_optionfile}}' dest=~/tmp/
+
+- name: install bitnami-redmine
+  command: ~/tmp/bitnami-install '~/tmp/{{bitnami_installer}}' '~/tmp/{{bitnami_optionfile}}' '{{bitnami_password}}'
+      creates=/opt/bitnami/ctlscript.sh
+  register: install_result
+
+- name: stop bitnami-readmine apps
+  command: /opt/bitnami/ctlscript.sh stop
+  when: install_result.changed
+
+- name: copy bitbami-redmine script
+  command: cp -piv /opt/bitnami/ctlscript.sh /etc/init.d/bitnami-redmine
+      creates=/etc/init.d/bitnami-redmine
+
+- name: edit bitbami-redmine script
+  replace: >-
+      dest=/etc/init.d/bitnami-redmine
+      regexp='(#!\/bin\/sh)\n+(# Allow only root execution)'
+      replace='\1\n\n# chkconfig: 2345 80 20\n# description: BitNami Redmine\n\n\2'
+
+- name: enable and start bitbami-redmine service
+  service: name=bitnami-redmine enabled=yes state=started
+
+- name: change redmine access url
+  copy: src={{item.src}} dest={{item.dest}} owner=root group=daemon mode=644
+  with_items:
+    - src: 'apps/redmine/conf/httpd-prefix.conf'
+      dest: '/opt/bitnami/apps/redmine/conf/'
+    - src: 'apps/redmine/conf/httpd-app.conf'
+      dest: '/opt/bitnami/apps/redmine/conf/'
+  notify: restart bitnami-redmine
