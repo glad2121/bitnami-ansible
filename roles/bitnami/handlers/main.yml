@@ -1,3 +1,3 @@
 ---
 - name: restart bitnami-redmine
-  service: name=bitnami-redmine state=restarted
+  service: name=bitnami-redmine state=restarted arguments=apache
