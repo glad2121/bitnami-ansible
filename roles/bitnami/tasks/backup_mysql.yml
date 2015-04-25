@@ -4,7 +4,7 @@
 - name: backup mysql
   shell: >-
       mysqldump -ubitnami -p{{ bitnami_mysql_password }} bitnami_redmine
-      > ~/tmp/bitnami_redmine.sql
+      > ~/tmp/bitnami_redmine{{ backup_suffix | default('') }}.sql
   environment:
     PATH: "{{ bitnami_path }}:{{ ansible_env.PATH }}"
   changed_when: false

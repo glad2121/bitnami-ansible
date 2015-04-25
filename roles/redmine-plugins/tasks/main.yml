@@ -1,0 +1,16 @@
+---
+# roles/redmine-plugins/tasks/main.yml
+
+- include: ../../bitnami/tasks/mysql_password.yml
+- include: ../../bitnami/tasks/backup_mysql.yml
+  vars:
+    backup_suffix: -plugins
+
+- include: install_plugin.yml
+  vars:
+    plugin_name: redmine_banner
+    plugin_archive: redmine_banner-0.1.1.zip
+    plugin_unarchived_dir: redmine_banner-0.1.1
+    plugin_dir: redmine_banner
+
+- include: ../../bitnami/tasks/migrate.yml

@@ -1,0 +1,21 @@
+---
+# roles/redmine-themes/tasks/install_theme.yml
+
+- name: remove {{ theme_name }} unarchived dir
+  file: path=~/tmp/{{ theme_unarchived_dir }} state=absent
+
+- name: unarchive {{ theme_name }} theme
+  unarchive: src={{ theme_archive }} dest=~/tmp/
+      creates={{ redmine_home }}/public/themes/{{ theme_dir }}
+
+- name: install {{ theme_name }} theme
+  command: mv ~/tmp/{{ theme_unarchived_dir }} {{ redmine_home }}/public/themes/{{ theme_dir }}
+      creates={{ redmine_home }}/public/themes/{{ theme_dir }}
+
+- name: chown {{ theme_name }} theme
+  file:
+    path: "{{ redmine_home }}/public/themes/{{ theme_dir }}"
+    state: directory
+    recurse: yes
+    owner: "{{ ansible_env.SUDO_USER | default(ansible_user_id) }}"
+    group: daemon

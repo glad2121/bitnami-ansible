@@ -1,5 +1,5 @@
 ---
-# roles/redmine/tasks/install_plugin.yml
+# roles/redmine-plugins/tasks/install_plugin.yml
 
 - name: remove {{ plugin_name }} unarchived dir
   file: path=~/tmp/{{ plugin_unarchived_dir }} state=absent
@@ -19,3 +19,4 @@
     recurse: yes
     owner: "{{ ansible_env.SUDO_USER | default(ansible_user_id) }}"
     group: daemon
+  notify: restart bitnami-redmine

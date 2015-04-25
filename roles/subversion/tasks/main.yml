@@ -7,6 +7,11 @@
     - "{{ svn_repos }}"
     - "{{ git_repos }}"
 
+- include: ../../bitnami/tasks/mysql_password.yml
+- include: ../../bitnami/tasks/backup_mysql.yml
+  vars:
+    backup_suffix: -svn
+
 - include: ../../redmine-plugins/tasks/install_plugin.yml
   vars:
     plugin_name: redmine_scm
@@ -29,8 +34,6 @@
     dest: "{{ bitnami_home }}/scripts/scm/"
     mode: ugo+x
 
-- include: ../../bitnami/tasks/mysql_password.yml
-- include: ../../bitnami/tasks/backup_mysql.yml
 - include: ../../bitnami/tasks/migrate.yml
 
 - name: copy Redmine.pm

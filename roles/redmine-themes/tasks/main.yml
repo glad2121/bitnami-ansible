@@ -1,0 +1,9 @@
+---
+# roles/redmine-themes/tasks/main.yml
+
+- include: install_theme.yml
+  vars:
+    theme_name: gitmike-r7
+    theme_archive: redmine-theme-gitmike-r7.zip
+    theme_unarchived_dir: redmine-theme-gitmike-r7
+    theme_dir: gitmike-r7
