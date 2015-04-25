@@ -1,6 +1,5 @@
 ---
+# roles/expect/tasks/main.yml
+
 - name: install expect
-  yum: name={{ item }}
-  with_items:
-    - /vagrant/repo/packages/tcl-8.5.7-6.el6.x86_64.rpm
-    - /vagrant/repo/packages/expect-5.44.1.15-5.el6_4.x86_64.rpm
+  yum: name=expect disablerepo=* enablerepo=local
