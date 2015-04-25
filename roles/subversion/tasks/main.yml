@@ -18,7 +18,39 @@
   template:
     src: apps/redmine/htdocs/config/scm.yml
     dest: "{{ redmine_home }}/config/"
+  notify: restart bitnami-redmine
+
+- name: make scripts dir
+  file: path="{{ bitnami_home }}/scripts/scm" state=directory
+
+- name: create post-create script
+  template:
+    src: scripts/scm/post-create.sh
+    dest: "{{ bitnami_home }}/scripts/scm/"
+    mode: ugo+x
 
 - include: ../../bitnami/tasks/mysql_password.yml
 - include: ../../bitnami/tasks/backup_mysql.yml
 - include: ../../bitnami/tasks/migrate.yml
+
+- name: copy Redmine.pm
+  copy:
+    src: perl/lib/site_perl/5.16.3/Apache/Authn/Redmine.pm
+    dest: "{{ bitnami_home }}/perl/lib/site_perl/5.16.3/Apache/Authn/"
+  notify: restart bitnami-redmine
+
+- name: copy svnauthz
+  copy: src=repos/svnauthz dest={{ bitnami_home }}/repos/
+  notify: restart bitnami-redmine
+
+- name: create httpd-vcs.conf
+  template:
+    src: apache2/conf/extra/httpd-vcs.conf
+    dest: "{{ bitnami_home }}/apache2/conf/extra/"
+  notify: restart bitnami-redmine
+
+- name: add include to httpd.conf
+  lineinfile:
+    dest: "{{ bitnami_home }}/apache2/conf/httpd.conf"
+    line: Include conf/extra/httpd-vcs.conf
+  notify: restart bitnami-redmine

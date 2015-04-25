@@ -3,7 +3,7 @@ production:
   auto_create: true
   #force_repository: false
   #pre_create: /usr/local/bin/pre-create.sh
-  #post_create: /usr/local/bin/post-create.sh
+  post_create: {{ bitnami_home }}/scripts/scm/post-create.sh
   #pre_delete: /usr/local/bin/pre-delete.sh
   #post_delete: /usr/local/bin/post-delete.sh
   #max_repos: 0
