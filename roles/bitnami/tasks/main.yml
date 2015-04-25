@@ -3,7 +3,7 @@
 
 - name: check bitnami-redmine version
   shell: >-
-      test {{ bitnami_home }}/README.txt &&
+      test -e {{ bitnami_home }}/README.txt &&
       head -n 1 {{ bitnami_home }}/README.txt |
       sed -re 's/[\t A-Za-z]+//'
   register: bitnami_version_result
@@ -20,7 +20,7 @@
   template: src={{ bitnami_optionfile }} dest=~/tmp/
 
 - name: install bitnami-redmine
-  command: ./bitnami-install {{ bitnami_installer }} {{ bitnami_optionfile }} {{ bitnami_password }}
+  command: ./bitnami-install ./{{ bitnami_installer }} {{ bitnami_optionfile }} {{ bitnami_password }}
       chdir=~/tmp
       creates={{ bitnami_home }}/ctlscript.sh
   register: install_bitnami_result
@@ -44,7 +44,10 @@
   service: name=bitnami-redmine enabled=yes
 
 - name: start bitbami-redmine
-  service: name=bitnami-redmine state=started
+  #service: name=bitnami-redmine state=started
+  command: service bitnami-redmine start
+  register: result
+  changed_when: "'started' in result.stdout"
 
 - name: change redmine access url
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=daemon mode=0644

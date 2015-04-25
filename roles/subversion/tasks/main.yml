@@ -7,7 +7,7 @@
     - "{{ svn_repos }}"
     - "{{ git_repos }}"
 
-- include: ../../bitnami/tasks/install_plugin.yml
+- include: ../../redmine-plugins/tasks/install_plugin.yml
   vars:
     plugin_name: redmine_scm
     plugin_archive: redmine_scm-0.5.0b.tar.bz2
