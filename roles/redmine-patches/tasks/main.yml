@@ -1,0 +1,18 @@
+---
+# roles/redmine-patches/tasks/main.yml
+
+- name: modify locale
+  lineinfile: dest={{ redmine_home }}/config/locales/ja.yml
+      regexp="{{ item.regexp }}" line="{{ item.line }}" backrefs=yes
+  with_items:
+    - regexp: '^( *label_age\:) +年齢$'
+      line: '\1 経過期間'
+  notify: restart bitnami-redmine
+
+- name: modify gantt
+  lineinfile:
+    dest: "{{ redmine_home }}/lib/redmine/helpers/gantt.rb"
+    regexp: '^( +label = "#{issue.status.name} #{issue.done_ratio}%)"$'
+    line: '\1 #{issue.assigned_to}"'
+    backrefs: yes
+  notify: restart bitnami-redmine

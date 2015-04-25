@@ -1,5 +1,5 @@
 ---
-# This playbook installs BitNami Redmine servers.
+# This playbook setups BitNami Redmine servers.
 
 - hosts: redmine-servers
   sudo: yes
@@ -17,4 +17,7 @@
     - common
     - expect
     - bitnami
+    - redmine-patches
+    - redmine-plugins
+    - redmine-themes
     - subversion
