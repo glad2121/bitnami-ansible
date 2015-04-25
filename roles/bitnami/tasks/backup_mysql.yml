@@ -1,0 +1,11 @@
+---
+# roles/bitnami/tasks/backup_mysql.yml
+
+- name: backup mysql
+  shell: >-
+      mysqldump -ubitnami
+      -p{{ bitnami_mysql_password_result.stdout }} bitnami_redmine
+      > ~/tmp/bitnami_redmine.sql
+  environment:
+    PATH: "{{ bitnami_path }}:{{ ansible_env.PATH }}"
+  changed_when: false

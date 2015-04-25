@@ -1,0 +1,24 @@
+---
+# roles/subversion/tasks/main.yml
+
+- name: make repo dirs
+  file: path={{ item }} state=directory owner=daemon group=daemon
+  with_items:
+    - "{{ svn_repos }}"
+    - "{{ git_repos }}"
+
+- include: ../../bitnami/tasks/install_plugin.yml
+  vars:
+    plugin_name: redmine_scm
+    plugin_archive: redmine_scm-0.5.0b.tar.bz2
+    plugin_unarchived_dir: redmine_scm
+    plugin_dir: redmine_scm
+
+- name: setup redmine_scm plugin
+  template:
+    src: apps/redmine/htdocs/config/scm.yml
+    dest: "{{ redmine_home }}/config/"
+
+- include: ../../bitnami/tasks/mysql_password.yml
+- include: ../../bitnami/tasks/backup_mysql.yml
+- include: ../../bitnami/tasks/migrate.yml

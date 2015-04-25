@@ -3,6 +3,18 @@
 
 - hosts: redmine-servers
   sudo: yes
+
+  pre_tasks:
+    - debug: var={{ item }}
+      with_items:
+        - bitnami_home
+        - bitnami_path
+        - redmine_home
+        - svn_repos
+        - git_repos
+
   roles:
+    - common
     - expect
     - bitnami
+    - subversion

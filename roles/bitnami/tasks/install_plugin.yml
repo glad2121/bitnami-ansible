@@ -1,0 +1,20 @@
+---
+# roles/redmine/tasks/install_plugin.yml
+
+- name: remove {{ plugin_name }} unarchived dir
+  file: path=~/tmp/{{ plugin_unarchived_dir }} state=absent
+
+- name: unarchive {{ plugin_name }} plugin
+  unarchive: src={{ plugin_archive }} dest=~/tmp/
+      creates={{ redmine_home }}/plugins/{{ plugin_dir }}
+
+- name: install {{ plugin_name }} plugin
+  command: mv ~/tmp/{{ plugin_unarchived_dir }} {{ redmine_home }}/plugins/{{ plugin_dir }}
+      creates={{ redmine_home }}/plugins/{{ plugin_dir }}
+
+- name: chown {{ plugin_name }} plugin
+  file:
+    path: "{{ redmine_home }}/plugins/{{ plugin_dir }}"
+    state: directory
+    recurse: yes
+    group: daemon

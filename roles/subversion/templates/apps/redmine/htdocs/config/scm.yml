@@ -1,0 +1,26 @@
+production:
+  deny_delete: false
+  auto_create: true
+  #force_repository: false
+  #pre_create: /usr/local/bin/pre-create.sh
+  #post_create: /usr/local/bin/post-create.sh
+  #pre_delete: /usr/local/bin/pre-delete.sh
+  #post_delete: /usr/local/bin/post-delete.sh
+  #max_repos: 0
+  #only_creator: false
+  allow_add_local: true
+  #allow_pickup: false
+  svn:
+    path:     {{ svn_repos }}
+    svnadmin: {{ bitnami_home }}/subversion/bin/svnadmin
+    url: svn
+  git:
+    path: {{ git_repos }}
+    git:  {{ bitnami_home}}/git/bin/git
+    options: --bare
+    url: git
+    #update_server_info: true
+    #git_ext: true
+    #append: trunk
+
+development:

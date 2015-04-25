@@ -1,9 +1,11 @@
 ---
-# group_vars/redmine-servers
+# group_vars/subversion-servers
 
 bitnami_installer: bitnami-redmine-2.6.3-0-linux-x64-installer.run
 bitnami_optionfile: bitnami-redmine.ini
 bitnami_home: /opt/bitnami
+bitnami_disable_components: phpmyadmin
+bitnami_user_name: Admin Subversion
 bitnami_paths:
   - "{{ bitnami_home }}/perl/bin"
   - "{{ bitnami_home }}/ruby/bin"
@@ -14,5 +16,5 @@ bitnami_paths:
   - "{{ bitnami_home }}/common/bin"
 bitnami_path: "{{ bitnami_paths | join(':') }}"
 redmine_home: "{{ bitnami_home }}/apps/redmine/htdocs"
-svn_repos: "{{ bitnami_home }}/repos/svn"
-git_repos: "{{ bitnami_home }}/repos/git"
+svn_repos: /var/lib/svn
+git_repos: /var/lib/git
