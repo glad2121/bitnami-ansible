@@ -6,6 +6,7 @@
       test -e {{ bitnami_home }}/README.txt &&
       head -n 1 {{ bitnami_home }}/README.txt |
       sed -re 's/[\t A-Za-z]+//'
+  always_run: yes
   register: bitnami_version_result
   failed_when: not bitnami_version_result.stdout | match('(2\.[5-6]\..+)?')
   changed_when: false
