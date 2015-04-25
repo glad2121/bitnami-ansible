@@ -1,32 +1,34 @@
 ---
+# roles/bitnami/tasks/main.yml
+
 - name: check bitnami-redmine version
   shell: >-
       test {{ bitnami_home }}/README.txt &&
       head -n 1 {{ bitnami_home }}/README.txt |
       sed -re 's/[\t A-Za-z]+//'
   register: bitnami_version_result
-  failed_when: bitnami_version_result.stdout != '' and
-      (not bitnami_version_result.stdout | match('2\.[5-6]\..+'))
+  failed_when: not bitnami_version_result.stdout | match('(2\.[5-6]\..+)?')
   changed_when: false
 
 - name: copy installer
-  copy: src={{ item }} dest=~/tmp/ mode='u+x'
+  copy: src={{ item }} dest=~/tmp/ mode=u+x
   with_items:
-    - /vagrant/downloads/{{ bitnami_installer }}
+    - "{{ downloads_dir }}/{{ bitnami_installer }}"
     - bitnami-install
 
-- name: copy install optionfile
-  copy: src='{{ bitnami_optionfile }}' dest=~/tmp/
+- name: create installer optionfile
+  template: src={{ bitnami_optionfile }} dest=~/tmp/
 
 - name: install bitnami-redmine
   command: ./bitnami-install {{ bitnami_installer }} {{ bitnami_optionfile }} {{ bitnami_password }}
       chdir=~/tmp
-      creates=/opt/bitnami/ctlscript.sh
+      creates={{ bitnami_home }}/ctlscript.sh
   register: install_bitnami_result
 
 - name: stop bitnami apps
-  command: /opt/bitnami/ctlscript.sh stop
-  when: install_bitnami_result | changed
+  command: >-
+      {{ bitnami_home }}/ctlscript.sh stop
+      creates=/etc/init.d/bitnami-redmine
 
 - name: copy bitbami-redmine script
   command: cp -piv {{ bitnami_home }}/ctlscript.sh /etc/init.d/bitnami-redmine
@@ -38,14 +40,17 @@
       regexp: '(#!\/bin\/sh)\n+(# Allow only root execution)'
       replace: '\1\n\n# chkconfig: 2345 80 20\n# description: BitNami Redmine\n\n\2'
 
-- name: enable bitbami-redmine service
+- name: enable bitbami-redmine
   service: name=bitnami-redmine enabled=yes
+
+- name: start bitbami-redmine
+  service: name=bitnami-redmine state=started
 
 - name: change redmine access url
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=daemon mode=0644
   with_items:
     - src: apps/redmine/conf/httpd-prefix.conf
-      dest: '{{ bitnami_home }}/apps/redmine/conf/'
+      dest: "{{ bitnami_home }}/apps/redmine/conf/"
     - src: apps/redmine/conf/httpd-app.conf
-      dest: '{{ bitnami_home }}/apps/redmine/conf/'
+      dest: "{{ bitnami_home }}/apps/redmine/conf/"
   notify: restart bitnami-redmine
