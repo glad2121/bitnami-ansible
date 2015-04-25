@@ -1,0 +1,2 @@
+yum_local_repo_url: file:///vagrant/repo
+downloads_dir: /vagrant/downloads
