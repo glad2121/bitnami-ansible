@@ -1,0 +1,18 @@
+---
+# This playbook adds user.
+
+- hosts: all
+  remote_user: root
+
+  vars_prompt:
+    - name: username
+      private: no
+    - name: password
+      private: yes
+      confirm: yes
+      encrypt: sha512_crypt
+      salt_size: 7
+
+  tasks:
+    - name: add user
+      user: name={{ username }} password={{ password }} groups=wheel
