@@ -57,3 +57,11 @@
     dest: "{{ bitnami_home }}/apache2/conf/httpd.conf"
     line: Include conf/extra/httpd-vcs.conf
   notify: restart bitnami-redmine
+
+- name: stop svnserv
+  command: service bitnami-redmine stop subversion
+  register: result
+  changed_when: "'stopped' in result.stdout"
+
+- name: disable svnserv
+  file: path={{ bitnami_home }}/subversion/scripts/ctl.sh mode=ugo-x
