@@ -18,7 +18,6 @@ bitnami_paths:
 bitnami_path: "{{ bitnami_paths | join(':') }}"
 
 redmine_home: "{{ bitnami_home }}/apps/redmine/htdocs"
-redmine_url: "{{ remote_host }}"
 
 svn_repos: "{{ bitnami_home }}/repos/svn"
 git_repos: "{{ bitnami_home }}/repos/git"

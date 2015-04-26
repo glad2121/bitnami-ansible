@@ -16,7 +16,7 @@
       chdir={{ redmine_home }}
   environment:
     PATH: "{{ bitnami_path }}:{{ ansible_env.PATH }}"
-    redmine_url: "{{ redmine_url }}"
+    redmine_host: "{{ remote_host }}"
     redmine_admin_fullname: "{{ bitnami_base_user_name | default('Admin Redmine') }}"
     redmine_admin_username: "{{ bitnami_base_user | default('admin') }}"
   register: result
