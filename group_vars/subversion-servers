@@ -16,5 +16,5 @@ bitnami_paths:
   - "{{ bitnami_home }}/common/bin"
 bitnami_path: "{{ bitnami_paths | join(':') }}"
 redmine_home: "{{ bitnami_home }}/apps/redmine/htdocs"
-svn_repos: /var/lib/svn
-git_repos: /var/lib/git
+svn_repos: /var/opt/bitnami/svn
+git_repos: /var/opt/bitnami/git
