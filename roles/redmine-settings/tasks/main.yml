@@ -1,0 +1,23 @@
+---
+# roles/redmine-settings/tasks/main.yml
+
+- include: ../../bitnami/tasks/mysql_password.yml
+- include: ../../bitnami/tasks/backup_mysql.yml
+  vars:
+    backup_suffix: -settings
+
+- name: copy redmine_setup task
+  copy:
+    src: lib/tasks/redmine_setup.rake
+    dest: "{{ redmine_home }}/lib/tasks/"
+
+- name: setup redmine
+  command: >-
+      bundle exec rake redmine_setup
+      RAILS_ENV=production
+      redmine_host_name={{ redmine_host_name }}
+      chdir={{ redmine_home }}
+  environment:
+    PATH: "{{ bitnami_path }}:{{ ansible_env.PATH }}"
+  register: result
+  changed_when: "'updated' in result.stdout"
