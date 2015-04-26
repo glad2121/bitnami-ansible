@@ -2,7 +2,7 @@ desc "Setup Redmine."
 
 task :redmine_setup => :environment do
   #host_name = ENV['redmine_host_name']
-  #unless host_name
+  #if host_name.blank?
   #  fail "redmine_host_name not specified."
   #end
 
@@ -20,24 +20,39 @@ task :redmine_setup => :environment do
     default_projects_public: '0',
     enabled_scm:             ['Subversion', 'Git'],
   }.each do |k, v|
-    if s = Setting.where(name: k).first
-      next if s.value == v
-      s.value = v
-      s.save!
-    else
-      Setting.create! name: k, value: v
+    if Setting[k] != v
+      puts "Setting[#{k}] = #{v}"
+      Setting[k] = v
+      count += 1
     end
-    count += 1
-    puts "settings.#{k} = #{v}"
   end
-  
+
   manager = Role.where(id: 3).first
   if manager.permissions.include?(:add_project)
+    puts "'add_project' removed from manager's role."
     manager.permissions.delete :add_project
     manager.save!
     count += 1
-    puts "'add_project' removed from manager's role."
   end
-  
+
+  admin_fullname = ENV['redmine_admin_fullname']
+  if admin_fullname.present?
+    names = admin_fullname.split(/\s+/)
+    if names.length == 2
+      admin_username = ENV['redmine_admin_username']
+      if admin_username.present?
+        if admin = User.where(login: admin_username).first
+          if admin.firstname != names[0] || admin.lastname != names[1]
+            puts "admin's fullname is #{admin_fullname}"
+            admin.firstname = names[0]
+            admin.lastname  = names[1]
+            admin.save!
+            count += 1
+          end
+        end
+      end
+    end
+  end
+
   puts "#{count} value(s) updated." if count > 0
 end

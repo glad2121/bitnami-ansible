@@ -12,12 +12,12 @@
     dest: "{{ redmine_home }}/lib/tasks/"
 
 - name: setup redmine
-  command: >-
-      bundle exec rake redmine_setup
-      RAILS_ENV=production
-      redmine_host_name={{ redmine_host_name }}
+  command: bundle exec rake redmine_setup RAILS_ENV=production
       chdir={{ redmine_home }}
   environment:
     PATH: "{{ bitnami_path }}:{{ ansible_env.PATH }}"
+    redmine_host_name: "{{ redmine_host_name }}"
+    redmine_admin_username: "{{ bitnami_base_user | default('admin') }}"
+    redmine_admin_fullname: "{{ bitnami_base_user_name | default('Admin Redmine') }}"
   register: result
   changed_when: "'updated' in result.stdout"
