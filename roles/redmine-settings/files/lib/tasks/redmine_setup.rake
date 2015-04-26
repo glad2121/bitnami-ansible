@@ -1,15 +1,15 @@
 desc "Setup Redmine."
 
 task :redmine_setup => :environment do
-  #host_name = ENV['redmine_host_name']
-  #if host_name.blank?
-  #  fail "redmine_host_name not specified."
+  #redmine_url = ENV['redmine_url']
+  #if redmine_url.blank?
+  #  fail "redmine_url not specified."
   #end
 
   count = 0
 
   {
-    #host_name:               host_name,
+    #host_name:               redmine_url,
     text_formatting:         'markdown',
     repositories_encodings:  'utf8,cp932,euc-jp',
     date_format:             '%Y-%m-%d',

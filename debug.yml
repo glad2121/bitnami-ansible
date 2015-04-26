@@ -1,0 +1,15 @@
+---
+# debug.yml
+
+- hosts: all
+
+  tasks:
+    - debug: var={{ item }}
+      with_items:
+        - remote_host
+        - remote_user
+        - bitnami_home
+        - bitnami_path
+        - redmine_home
+        - svn_repos
+        - git_repos

@@ -1,13 +1,15 @@
 ---
-# This playbook setups BitNami Redmine servers.
+# This playbook setups Subversion servers.
 
-- hosts: redmine-servers
+- hosts: subversion-servers
   sudo: yes
 
   pre_tasks:
     - debug: var={{ item }}
       with_items:
         - bitnami_home
+        - svn_repos
+        - git_repos
 
   roles:
     - common
@@ -15,6 +17,6 @@
     - bitnami
     - redmine-settings
     - redmine-patches
-    - redmine-plugins
+    #- redmine-plugins
     - redmine-themes
     - subversion

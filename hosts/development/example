@@ -1,0 +1,12 @@
+[redmine-servers]
+192.168.33.12
+
+[subversion-servers]
+192.168.33.13
+
+[rhel6-servers:children]
+redmine-servers
+subversion-servers
+
+[rhel6-servers:vars]
+bitnami_password=

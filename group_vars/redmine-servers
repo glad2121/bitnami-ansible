@@ -1,19 +1,3 @@
 ---
 # group_vars/redmine-servers
 
-bitnami_installer: bitnami-redmine-2.6.3-0-linux-x64-installer.run
-bitnami_optionfile: bitnami-redmine.ini
-bitnami_home: /opt/bitnami
-bitnami_paths:
-  - "{{ bitnami_home }}/perl/bin"
-  - "{{ bitnami_home }}/ruby/bin"
-  - "{{ bitnami_home }}/git/bin"
-  - "{{ bitnami_home }}/subversion/bin"
-  - "{{ bitnami_home }}/mysql/bin"
-  - "{{ bitnami_home }}/apache2/bin"
-  - "{{ bitnami_home }}/common/bin"
-bitnami_path: "{{ bitnami_paths | join(':') }}"
-redmine_home: "{{ bitnami_home }}/apps/redmine/htdocs"
-redmine_host_name: "{{ ansible_eth0.ipv4.address }}"
-svn_repos: "{{ bitnami_home }}/repos/svn"
-git_repos: "{{ bitnami_home }}/repos/git"
