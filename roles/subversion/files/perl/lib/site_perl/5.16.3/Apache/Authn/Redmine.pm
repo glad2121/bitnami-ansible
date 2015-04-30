@@ -243,13 +243,15 @@ sub RedmineDSN {
         users.hashed_password,
         users.salt,
         users.auth_source_id,
+        roles.id,
         roles.permissions,
         projects.status
-      FROM projects, users, roles
+      FROM users, roles, projects
       WHERE
-        users.login=?
-        AND projects.identifier=?
-        AND users.status=1
+        users.login = ?
+        AND users.status = 1
+        AND projects.identifier = ?
+        AND roles.permissions IS NOT NULL
         AND (
           roles.id IN (
             SELECT member_roles.role_id
@@ -261,7 +263,7 @@ sub RedmineDSN {
           OR (
             cast(projects.is_public as CHAR) IN ('t', '1')
             AND (
-              roles.builtin=1
+              roles.builtin = 1
               OR
                 roles.id IN (
                   SELECT member_roles.role_id
@@ -273,8 +275,7 @@ sub RedmineDSN {
                     AND g.type = 'GroupNonMember')
             )
           )
-        )
-        AND roles.permissions IS NOT NULL";
+        )";
   $self->{RedmineQuery} = trim($query);
 }
 
@@ -484,8 +485,12 @@ sub is_member {
   my $redmine_pass = shift;
   my $r = shift;
 
-  my $dbh         = connect_database($r);
   my $project_id  = get_project_identifier($r);
+  if ($project_id eq "") {
+    return is_valid_user($redmine_user, $redmine_pass, $r);
+  }
+
+  my $dbh         = connect_database($r);
 
   my $pass_digest = Digest::SHA::sha1_hex($redmine_pass);
 
@@ -502,48 +507,28 @@ sub is_member {
   $sth->execute($redmine_user, $project_id);
 
   my $ret;
-  while (my ($hashed_password, $salt, $auth_source_id, $permissions, $project_status) = $sth->fetchrow_array) {
+  while (my ($hashed_password, $salt, $auth_source_id, $role_id, $permissions, $project_status) = $sth->fetchrow_array) {
+    #$r->warn("$redmine_user:$project_id:$access_mode:$role_id");
     if ($project_status eq "9" || ($project_status ne "1" && $access_mode eq "W")) {
       last;
+    }
+
+    unless (($access_mode eq "R" && $permissions =~ /:browse_repository/) || $permissions =~ /:commit_access/) {
+      next;
     }
 
     unless ($auth_source_id) {
       my $method = $r->method;
       my $salted_password = Digest::SHA::sha1_hex($salt.$pass_digest);
-      if ($hashed_password eq $salted_password &&
-          (($access_mode eq "R" && $permissions =~ /:browse_repository/) || $permissions =~ /:commit_access/)) {
+      if ($hashed_password eq $salted_password) {
         $ret = 1;
-        last;
       }
     } elsif ($CanUseLDAPAuth) {
-      my $sthldap = $dbh->prepare(
-        "SELECT host, port, tls, account, account_password, base_dn, attr_login from auth_sources WHERE id = ?;"
-      );
-      $sthldap->execute($auth_source_id);
-      while (my @rowldap = $sthldap->fetchrow_array) {
-        my $bind_as = $rowldap[3] ? $rowldap[3] : "";
-        my $bind_pw = $rowldap[4] ? $rowldap[4] : "";
-        if ($bind_as =~ m/\$login/) {
-          # replace $login with $redmine_user and use $redmine_pass
-          $bind_as =~ s/\$login/$redmine_user/g;
-          $bind_pw = $redmine_pass
-        }
-        my $ldap = Authen::Simple::LDAP->new(
-          host   => ($rowldap[2] eq "1" || $rowldap[2] eq "t") ? "ldaps://$rowldap[0]:$rowldap[1]" : $rowldap[0],
-          port   => $rowldap[1],
-          basedn => $rowldap[5],
-          binddn => $bind_as,
-          bindpw => $bind_pw,
-          filter => "(".$rowldap[6]."=%s)"
-        );
-        my $method = $r->method;
-        $ret = 1 if ($ldap->authenticate($redmine_user, $redmine_pass) &&
-            (($access_mode eq "R" && $permissions =~ /:browse_repository/) || $permissions =~ /:commit_access/));
-
+      if (ldap_authenticate($redmine_user, $redmine_pass, $auth_source_id, $dbh, $r)) {
+        $ret = 1;
       }
-      $sthldap->finish();
-      undef $sthldap;
     }
+    last;
   }
   $sth->finish();
   undef $sth;
@@ -567,13 +552,113 @@ sub is_member {
   $ret;
 }
 
+sub is_valid_user {
+  my $redmine_user = shift;
+  my $redmine_pass = shift;
+  my $r = shift;
+
+  my $dbh         = connect_database($r);
+
+  my $pass_digest = Digest::SHA::sha1_hex($redmine_pass);
+
+  my $cfg = Apache2::Module::get_config(__PACKAGE__, $r->server, $r->per_dir_config);
+  my $usrprojpass;
+  if ($cfg->{RedmineCacheCredsMax}) {
+    $usrprojpass = $cfg->{RedmineCacheCreds}->get($redmine_user);
+    return 1 if (defined $usrprojpass and ($usrprojpass eq $pass_digest));
+  }
+  my $sth = $dbh->prepare(
+    "SELECT users.hashed_password, users.salt, users.auth_source_id FROM users WHERE users.login = ? AND users.status = 1"
+  );
+  $sth->execute($redmine_user);
+
+  my $ret;
+  while (my ($hashed_password, $salt, $auth_source_id) = $sth->fetchrow_array) {
+    #$r->warn("$redmine_user");
+
+    unless ($auth_source_id) {
+      my $method = $r->method;
+      my $salted_password = Digest::SHA::sha1_hex($salt.$pass_digest);
+      if ($hashed_password eq $salted_password) {
+        $ret = 1;
+      }
+    } elsif ($CanUseLDAPAuth) {
+      if (ldap_authenticate($redmine_user, $redmine_pass, $auth_source_id, $dbh, $r)) {
+        $ret = 1;
+      }
+    }
+    last;
+  }
+  $sth->finish();
+  undef $sth;
+  $dbh->disconnect();
+  undef $dbh;
+
+  if ($cfg->{RedmineCacheCredsMax} and $ret) {
+    if (defined $usrprojpass) {
+      $cfg->{RedmineCacheCreds}->set($redmine_user, $pass_digest);
+    } else {
+      if ($cfg->{RedmineCacheCredsCount} < $cfg->{RedmineCacheCredsMax}) {
+        $cfg->{RedmineCacheCreds}->set($redmine_user, $pass_digest);
+        $cfg->{RedmineCacheCredsCount}++;
+      } else {
+        $cfg->{RedmineCacheCreds}->clear();
+        $cfg->{RedmineCacheCredsCount} = 0;
+      }
+    }
+  }
+
+  $ret;
+}
+
+sub ldap_authenticate {
+  my $redmine_user   = shift;
+  my $redmine_pass   = shift;
+  my $auth_source_id = shift;
+  my $dbh = shift;
+  my $r   = shift;
+
+  my $sthldap = $dbh->prepare(
+    "SELECT host, port, tls, account, account_password, base_dn, attr_login from auth_sources WHERE id = ?;"
+  );
+  $sthldap->execute($auth_source_id);
+
+  my $ret;
+  while (my @rowldap = $sthldap->fetchrow_array) {
+    my $bind_as = $rowldap[3] ? $rowldap[3] : "";
+    my $bind_pw = $rowldap[4] ? $rowldap[4] : "";
+    if ($bind_as =~ m/\$login/) {
+      # replace $login with $redmine_user and use $redmine_pass
+      $bind_as =~ s/\$login/$redmine_user/g;
+      $bind_pw = $redmine_pass
+    }
+    my $ldap = Authen::Simple::LDAP->new(
+      host   => ($rowldap[2] eq "1" || $rowldap[2] eq "t") ? "ldaps://$rowldap[0]:$rowldap[1]" : $rowldap[0],
+      port   => $rowldap[1],
+      basedn => $rowldap[5],
+      binddn => $bind_as,
+      bindpw => $bind_pw,
+      filter => "(".$rowldap[6]."=%s)"
+    );
+    my $method = $r->method;
+    if ($ldap->authenticate($redmine_user, $redmine_pass)) {
+      $ret = 1;
+    }
+    last;
+  }
+  $sthldap->finish();
+  undef $sthldap;
+
+  $ret;
+}
+
 sub get_project_identifier {
   my $r = shift;
 
   my $cfg = Apache2::Module::get_config(__PACKAGE__, $r->server, $r->per_dir_config);
   my $location = $r->location;
   $location =~ s/\.git$// if (defined $cfg->{RedmineGitSmartHttp} and $cfg->{RedmineGitSmartHttp});
-  my ($identifier) = $r->uri =~ m{$location/*([^/.]+)};
+  my ($identifier) = $r->uri =~ m{$location/*([^/.]*)};
   $identifier;
 }
 
