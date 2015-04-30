@@ -510,7 +510,8 @@ sub is_member {
     unless ($auth_source_id) {
       my $method = $r->method;
       my $salted_password = Digest::SHA::sha1_hex($salt.$pass_digest);
-      if ($hashed_password eq $salted_password && (($access_mode eq "R" && $permissions =~ /:browse_repository/) || $permissions =~ /:commit_access/) ) {
+      if ($hashed_password eq $salted_password &&
+          (($access_mode eq "R" && $permissions =~ /:browse_repository/) || $permissions =~ /:commit_access/)) {
         $ret = 1;
         last;
       }
@@ -536,7 +537,8 @@ sub is_member {
           filter => "(".$rowldap[6]."=%s)"
         );
         my $method = $r->method;
-        $ret = 1 if ($ldap->authenticate($redmine_user, $redmine_pass) && (($access_mode eq "R" && $permissions =~ /:browse_repository/) || $permissions =~ /:commit_access/));
+        $ret = 1 if ($ldap->authenticate($redmine_user, $redmine_pass) &&
+            (($access_mode eq "R" && $permissions =~ /:browse_repository/) || $permissions =~ /:commit_access/));
 
       }
       $sthldap->finish();
