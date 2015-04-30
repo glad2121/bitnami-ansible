@@ -17,4 +17,5 @@
     - redmine-patches
     - redmine-plugins
     - redmine-themes
+    - public
     - subversion

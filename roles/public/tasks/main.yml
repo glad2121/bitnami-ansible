@@ -1,0 +1,17 @@
+---
+# roles/public/tasks/main.yml
+
+- name: make public dir
+  file: path={{ public_dir }} state=directory owner=daemon group=daemon
+
+- name: create httpd-public.conf
+  template:
+    src: apache2/conf/extra/httpd-public.conf
+    dest: "{{ bitnami_home }}/apache2/conf/extra/"
+  notify: restart bitnami-redmine
+
+- name: add include to httpd.conf
+  lineinfile:
+    dest: "{{ bitnami_home }}/apache2/conf/httpd.conf"
+    line: Include conf/extra/httpd-public.conf
+  notify: restart bitnami-redmine
