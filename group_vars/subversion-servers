@@ -4,5 +4,7 @@
 bitnami_disable_components: phpmyadmin
 bitnami_base_user_name: Admin Subversion
 
+redmine_title: SVN Manager
+
 svn_repos: /var/opt/bitnami/svn
 git_repos: /var/opt/bitnami/git

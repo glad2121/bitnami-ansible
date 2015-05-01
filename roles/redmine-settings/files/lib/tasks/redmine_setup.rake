@@ -1,17 +1,14 @@
 desc "Setup Redmine."
 
 task :redmine_setup => :environment do
-  #host_name = ENV['redmine_host']
-  #if host_name.blank?
-  #  fail "redmine_host not specified."
-  #end
+  app_title = ENV['redmine_title']
+  host_name = ENV['redmine_host']
 
   count = 0
 
-  {
-    #host_name:               host_name,
+  settings = {
     text_formatting:         'markdown',
-    repositories_encodings:  'utf8,cp932,euc-jp',
+    repositories_encodings:  'utf-8,cp932,euc-jp',
     date_format:             '%Y-%m-%d',
     time_format:             '%H:%M',
     user_format:             :lastname_firstname,
@@ -19,7 +16,10 @@ task :redmine_setup => :environment do
     unsubscribe:             '0',
     default_projects_public: '0',
     enabled_scm:             ['Subversion', 'Git'],
-  }.each do |k, v|
+  }
+  settings[:app_title] = app_title if app_title.present?
+  settings[:host_name] = host_name if host_name.present?
+  settings.each do |k, v|
     if Setting[k] != v
       puts "Setting[#{k}] = #{v}"
       Setting[k] = v
