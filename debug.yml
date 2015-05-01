@@ -6,8 +6,8 @@
   tasks:
     - debug: var={{ item }}
       with_items:
-        - remote_host
-        - remote_user
+        - inventory_hostname
+        - ansible_ssh_user
         - bitnami_home
         - bitnami_path
         - redmine_home

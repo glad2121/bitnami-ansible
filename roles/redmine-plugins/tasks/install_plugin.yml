@@ -17,6 +17,6 @@
     path: "{{ redmine_home }}/plugins/{{ plugin_dir }}"
     state: directory
     recurse: yes
-    owner: "{{ remote_user }}"
+    owner: "{{ ansible_ssh_user }}"
     group: daemon
   notify: restart bitnami-redmine

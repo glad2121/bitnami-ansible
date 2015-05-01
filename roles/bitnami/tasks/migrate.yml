@@ -5,7 +5,7 @@
   command: bundle exec rake redmine:plugins:migrate RAILS_ENV=production
       chdir={{ redmine_home }}
   environment:
-    PATH: "{{ bitnami_path }}:{{ ansible_env.PATH }}"
+    PATH: "{{ bitnami_path }}"
   register: result
   changed_when: "'migrated' in result.stdout"
   notify: restart bitnami-redmine

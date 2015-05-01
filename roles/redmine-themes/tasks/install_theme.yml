@@ -17,5 +17,5 @@
     path: "{{ redmine_home }}/public/themes/{{ theme_dir }}"
     state: directory
     recurse: yes
-    owner: "{{ remote_user }}"
+    owner: "{{ ansible_ssh_user }}"
     group: daemon

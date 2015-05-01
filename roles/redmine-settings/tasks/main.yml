@@ -15,8 +15,8 @@
   command: bundle exec rake redmine_setup RAILS_ENV=production
       chdir={{ redmine_home }}
   environment:
-    PATH: "{{ bitnami_path }}:{{ ansible_env.PATH }}"
-    redmine_host: "{{ remote_host }}"
+    PATH: "{{ bitnami_path }}"
+    redmine_host: "{{ inventory_hostname }}"
     redmine_admin_fullname: "{{ bitnami_base_user_name | default('Admin Redmine') }}"
     redmine_admin_username: "{{ bitnami_base_user | default('admin') }}"
   register: result

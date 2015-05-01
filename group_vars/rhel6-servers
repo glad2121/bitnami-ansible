@@ -15,6 +15,7 @@ bitnami_paths:
   - "{{ bitnami_home }}/mysql/bin"
   - "{{ bitnami_home }}/apache2/bin"
   - "{{ bitnami_home }}/common/bin"
+  - "{{ ansible_env.PATH }}"
 bitnami_path: "{{ bitnami_paths | join(':') }}"
 
 redmine_home: "{{ bitnami_home }}/apps/redmine/htdocs"
