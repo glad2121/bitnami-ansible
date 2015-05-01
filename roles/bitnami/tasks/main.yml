@@ -37,9 +37,9 @@
 
 - name: modify bitbami-redmine script
   replace:
-      dest: /etc/init.d/bitnami-redmine
-      regexp: '(#!\/bin\/sh)\n+(# Allow only root execution)'
-      replace: '\1\n\n# chkconfig: 2345 80 20\n# description: BitNami Redmine\n\n\2'
+    dest: /etc/init.d/bitnami-redmine
+    regexp: '(#!\/bin\/sh)\n+(# Allow only root execution)'
+    replace: '\1\n\n# chkconfig: 2345 80 20\n# description: BitNami Redmine\n\n\2'
 
 - name: enable bitbami-redmine
   service: name=bitnami-redmine enabled=yes
