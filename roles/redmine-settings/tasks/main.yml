@@ -1,6 +1,18 @@
 ---
 # roles/redmine-settings/tasks/main.yml
 
+- name: setup email settings
+  replace:
+    dest: "{{ redmine_home }}/config/configuration.yml"
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  with_items:
+    - regexp: '^(  email_delivery\:)\n([^#]*\n)*'
+      replace: '\1\n\n'
+    - regexp: '^(  #  email_delivery\:)\n([^#]*\n)*'
+      replace: '\1\n'
+  notify: restart bitnami-redmine
+
 - include: ../../bitnami/tasks/mysql_password.yml
 - include: ../../bitnami/tasks/backup_mysql.yml
   vars:
