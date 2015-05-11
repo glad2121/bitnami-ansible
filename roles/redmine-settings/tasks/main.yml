@@ -7,8 +7,8 @@
     regexp: "{{ item.regexp }}"
     replace: "{{ item.replace }}"
   with_items:
-    - regexp: '^(  email_delivery\:)\n([^#]*\n)*'
-      replace: '\1\n\n'
+    #- regexp: '^(  email_delivery\:)\n([^#]*\n)*'
+    #  replace: '\1\n\n'
     - regexp: '^(  #  email_delivery\:)\n([^#]*\n)*'
       replace: '\1\n'
   notify: restart bitnami-redmine
