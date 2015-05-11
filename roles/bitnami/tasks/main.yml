@@ -58,3 +58,9 @@
     - src: apps/redmine/conf/httpd-app.conf
       dest: "{{ bitnami_home }}/apps/redmine/conf/"
   notify: restart bitnami-redmine
+
+- name: change passenger settings
+  lineinfile:
+    dest: "{{ bitnami_home }}/apache2/conf/bitnami/passenger.conf"
+    line: RailsPoolIdleTime 36000
+  notify: restart bitnami-redmine
