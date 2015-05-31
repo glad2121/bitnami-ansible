@@ -1,0 +1,19 @@
+---
+# roles/redmine-patches/tasks/patch_projects.yml
+
+- name: patch projects/show view
+  replace:
+    dest: "{{ redmine_home }}/app/views/projects/show.html.erb"
+    regexp: '(<div class="splitcontentleft">)\n( +<% if @project.description.present\? %>)'
+    replace: |-
+        \1
+          <% if repo = @project.repositories.select(&:is_default).first %>
+          <%   url = repo.url.sub(/^.*(?=\/(svn|git))/, "http://#{Setting[:host_name]}") %>
+          <div>
+            <%=h repo.scm_name %>:<br>
+            <a href="<%=h url %>"><%=h url %></a>
+          </div>
+          <% end %>
+        \2
+  when: "'subversion-servers' in group_names"
+  notify: restart bitnami-redmine

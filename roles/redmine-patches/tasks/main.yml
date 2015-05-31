@@ -1,35 +1,7 @@
 ---
 # roles/redmine-patches/tasks/main.yml
 
-- name: modify locale
-  lineinfile: dest={{ redmine_home }}/config/locales/ja.yml
-      regexp="{{ item.regexp }}" line="{{ item.line }}" backrefs=yes
-  with_items:
-    - regexp: '^( *label_age\:) +年齢$'
-      line: '\1 経過期間'
-  notify: restart bitnami-redmine
-
-- name: modify gantt
-  lineinfile:
-    dest: "{{ redmine_home }}/lib/redmine/helpers/gantt.rb"
-    regexp: '^( +label = "#{issue.status.name} #{issue.done_ratio}%)"$'
-    line: '\1 #{issue.assigned_to}"'
-    backrefs: yes
-  notify: restart bitnami-redmine
-
-- name: modify projects/show
-  replace:
-    dest: "{{ redmine_home }}/app/views/projects/show.html.erb"
-    regexp: '(<div class="splitcontentleft">)\n( +<% if @project.description.present\? %>)'
-    replace: |-
-        \1
-          <% if repo = @project.repositories.select(&:is_default).first %>
-          <%   url = repo.url.sub(/^.*(?=\/(svn|git))/, "http://#{Setting[:host_name]}") %>
-          <div>
-            <%=h repo.scm_name %>:<br>
-            <a href="<%=h url %>"><%=h url %></a>
-          </div>
-          <% end %>
-        \2
-  when: "'subversion-servers' in group_names"
-  notify: restart bitnami-redmine
+- include: patch_locales.yml
+- include: patch_gantts.yml
+- include: patch_projects.yml
+- include: patch_auth_sources.yml

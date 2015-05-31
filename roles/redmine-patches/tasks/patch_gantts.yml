@@ -1,0 +1,10 @@
+---
+# roles/redmine-patches/tasks/patch_gantts.yml
+
+- name: patch gantt helper
+  lineinfile:
+    dest: "{{ redmine_home }}/lib/redmine/helpers/gantt.rb"
+    regexp: '^( +label = "#{issue.status.name} #{issue.done_ratio}%)"$'
+    line: '\1 #{issue.assigned_to}"'
+    backrefs: yes
+  notify: restart bitnami-redmine

@@ -1,0 +1,12 @@
+---
+# roles/redmine-patches/tasks/patch_auth_sources.yml
+
+- name: patch auth_source_ldap model
+  replace:
+    dest: "{{ redmine_home }}/app/models/auth_source_ldap.rb"
+    regexp: '(\s+)(ldap_con = initialize_ldap_con\(self.account.sub\("\$login", Net::LDAP::DN.escape\(login\)\), password\))\n(\s+else)'
+    replace: |-
+        \1\2
+        \1return nil unless ldap_con.bind
+        \3
+  notify: restart bitnami-redmine
