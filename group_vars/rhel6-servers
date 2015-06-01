@@ -22,5 +22,7 @@ redmine_home: "{{ bitnami_home }}/apps/redmine/htdocs"
 
 public_dir: /var/opt/bitnami/public
 
+ldap_enabled: false
+
 svn_repos: "{{ bitnami_home }}/repos/svn"
 git_repos: "{{ bitnami_home }}/repos/git"

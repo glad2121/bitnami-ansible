@@ -36,14 +36,21 @@
 
 - include: ../../bitnami/tasks/migrate.yml
 
+- name: copy svnauthz
+  copy: src=repos/svnauthz dest={{ bitnami_home }}/repos/
+  notify: restart bitnami-redmine
+
 - name: copy Redmine.pm
   copy:
     src: perl/lib/site_perl/5.16.3/Apache/Authn/Redmine.pm
     dest: "{{ bitnami_home }}/perl/lib/site_perl/5.16.3/Apache/Authn/"
   notify: restart bitnami-redmine
 
-- name: copy svnauthz
-  copy: src=repos/svnauthz dest={{ bitnami_home }}/repos/
+- name: copy Perl modules
+  copy:
+    src: perl/lib/site_perl
+    dest: "{{ bitnami_home }}/perl/lib/"
+  when: ldap_enabled
   notify: restart bitnami-redmine
 
 - name: create httpd-vcs.conf
