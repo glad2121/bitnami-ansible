@@ -1,0 +1,46 @@
+---
+# roles/jenkins/tasks/main.yml
+
+- name: copy jenkins rpm
+  copy: src={{ downloads_dir }}/{{ jenkins_rpm }} dest=/tmp/
+
+- name: install jenkins
+  yum: name=/tmp/{{ jenkins_rpm }} disablerepo=*
+
+- name: change jenkins settings
+  lineinfile: dest=/etc/sysconfig/jenkins
+      regexp="{{ item.regexp }}" line="{{ item.line }}" backrefs=yes
+  with_items:
+    - regexp: '^JENKINS_HOME='
+      line: 'JENKINS_HOME=\"{{ jenkins_home }}\"'
+    - regexp: '^JENKINS_PORT='
+      line: 'JENKINS_PORT=\"8089\"'
+    - regexp: '^JENKINS_AJP_PORT='
+      line: 'JENKINS_AJP_PORT=\"8009\"'
+    - regexp: '^JENKINS_ARGS='
+      line: 'JENKINS_ARGS=\"--prefix=/jenkins\"'
+
+- name: enable jenkins
+  service: name=jenkins enabled=yes state=started
+
+- include: ../../bitnami/tasks/mysql_password.yml
+
+- name: create httpd-jenkins.conf
+  template:
+    src: apache2/conf/extra/httpd-jenkins.conf
+    dest: "{{ bitnami_home }}/apache2/conf/extra/"
+  notify: restart bitnami-redmine
+
+- name: add include to httpd.conf
+  lineinfile:
+    dest: "{{ bitnami_home }}/apache2/conf/httpd.conf"
+    line: Include conf/extra/httpd-jenkins.conf
+  notify: restart bitnami-redmine
+
+- name: install jenkins plugins
+  copy: src="{{ item }}" dest="{{ jenkins_home }}/plugins/"
+      owner=jenkins group=jenkins mode=0644
+  with_items:
+    - reverse-proxy-auth-plugin.hpi
+    - role-strategy.hpi
+  notify: restart jenkins

@@ -26,3 +26,8 @@ ldap_enabled: false
 
 svn_repos: "{{ bitnami_home }}/repos/svn"
 git_repos: "{{ bitnami_home }}/repos/git"
+
+jdk_rpm: jdk-8u45-linux-x64.rpm
+
+jenkins_rpm: jenkins-1.609.1-1.1.noarch.rpm
+jenkins_home: /var/lib/jenkins

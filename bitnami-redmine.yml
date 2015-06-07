@@ -19,3 +19,5 @@
     - redmine-themes
     - public
     - subversion
+    - jdk
+    - jenkins

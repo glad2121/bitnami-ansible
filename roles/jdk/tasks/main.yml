@@ -1,0 +1,8 @@
+---
+# roles/jdk/tasks/main.yml
+
+- name: copy jdk rpm
+  copy: src={{ downloads_dir }}/{{ jdk_rpm }} dest=/tmp/
+
+- name: install jdk
+  yum: name=/tmp/{{ jdk_rpm }} disablerepo=*
