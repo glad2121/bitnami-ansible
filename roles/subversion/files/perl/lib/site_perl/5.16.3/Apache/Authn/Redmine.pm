@@ -233,6 +233,11 @@ my @directives = (
     req_override => OR_AUTHCFG,
     args_how => TAKE1,
   },
+  {
+    name => 'RedmineAuthnOnly',
+    req_override => OR_AUTHCFG,
+    args_how => TAKE1,
+  },
 );
 
 sub RedmineDSN {
@@ -304,6 +309,17 @@ sub RedmineGitSmartHttp {
     $self->{RedmineGitSmartHttp} = 1;
   } else {
     $self->{RedmineGitSmartHttp} = 0;
+  }
+}
+
+sub RedmineAuthnOnly {
+  my ($self, $parms, $arg) = @_;
+  $arg = lc $arg;
+
+  if ($arg eq "yes" || $arg eq "true") {
+    $self->{RedmineAuthnOnly} = 1;
+  } else {
+    $self->{RedmineAuthnOnly} = 0;
   }
 }
 
@@ -490,13 +506,20 @@ sub is_member {
     return is_valid_user($redmine_user, $redmine_pass, $r);
   }
 
+  my $cfg = Apache2::Module::get_config(__PACKAGE__, $r->server, $r->per_dir_config);
+  if (defined $cfg->{RedmineAuthnOnly} and $cfg->{RedmineAuthnOnly}) {
+    if ($project_id eq "logout") {
+      return 0;
+    }
+    return is_valid_user($redmine_user, $redmine_pass, $r);
+  }
+
   my $dbh         = connect_database($r);
 
   my $pass_digest = Digest::SHA::sha1_hex($redmine_pass);
 
   my $access_mode = request_is_read_only($r) ? "R" : "W";
 
-  my $cfg = Apache2::Module::get_config(__PACKAGE__, $r->server, $r->per_dir_config);
   my $usrprojpass;
   if ($cfg->{RedmineCacheCredsMax}) {
     $usrprojpass = $cfg->{RedmineCacheCreds}->get($redmine_user.":".$project_id.":".$access_mode);
