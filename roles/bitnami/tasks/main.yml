@@ -14,7 +14,7 @@
 - name: copy installer
   copy: src={{ item }} dest=~/tmp/ mode=u+x
   with_items:
-    - "{{ bitnami_downloads_dir }}/{{ bitnami_installer }}"
+    - "{{ downloads_dir }}/{{ bitnami_installer }}"
     - bitnami-install
 
 - name: create installer optionfile
