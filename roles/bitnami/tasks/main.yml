@@ -31,20 +31,20 @@
       {{ bitnami_home }}/ctlscript.sh stop
       creates=/etc/init.d/bitnami-redmine
 
-- name: copy bitbami-redmine script
+- name: copy bitnami-redmine script
   command: cp -piv {{ bitnami_home }}/ctlscript.sh /etc/init.d/bitnami-redmine
       creates=/etc/init.d/bitnami-redmine
 
-- name: modify bitbami-redmine script
+- name: modify bitnami-redmine script
   replace:
     dest: /etc/init.d/bitnami-redmine
     regexp: '(#!\/bin\/sh)\n+(# Allow only root execution)'
     replace: '\1\n\n# chkconfig: 2345 80 20\n# description: BitNami Redmine\n\n\2'
 
-- name: enable bitbami-redmine
+- name: enable bitnami-redmine
   service: name=bitnami-redmine enabled=yes
 
-- name: start bitbami-redmine
+- name: start bitnami-redmine
   #service: name=bitnami-redmine state=started
   command: service bitnami-redmine start
   register: result

@@ -16,7 +16,7 @@ production:
     url: svn
   git:
     path: {{ git_repos }}
-    git:  {{ bitnami_home}}/git/bin/git
+    git:  {{ bitnami_home }}/git/bin/git
     options: --bare
     url: git
     #update_server_info: true

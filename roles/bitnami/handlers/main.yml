@@ -1,3 +1,5 @@
 ---
+# roles/bitnami/handlers/main.yml
+
 - name: restart bitnami-redmine
   service: name=bitnami-redmine state=restarted arguments=apache
