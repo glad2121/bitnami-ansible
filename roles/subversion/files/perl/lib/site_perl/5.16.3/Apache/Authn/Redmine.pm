@@ -536,6 +536,7 @@ sub is_member {
       last;
     }
 
+    # check the permission first
     unless (($access_mode eq "R" && $permissions =~ /:browse_repository/) || $permissions =~ /:commit_access/) {
       next;
     }
@@ -551,6 +552,7 @@ sub is_member {
         $ret = 1;
       }
     }
+    # authenticate only once
     last;
   }
   $sth->finish();
@@ -598,7 +600,6 @@ sub is_valid_user {
   my $ret;
   while (my ($hashed_password, $salt, $auth_source_id) = $sth->fetchrow_array) {
     #$r->warn("$redmine_user");
-
     unless ($auth_source_id) {
       my $method = $r->method;
       my $salted_password = Digest::SHA::sha1_hex($salt.$pass_digest);
@@ -610,6 +611,7 @@ sub is_valid_user {
         $ret = 1;
       }
     }
+    # authenticate only once
     last;
   }
   $sth->finish();
@@ -664,6 +666,7 @@ sub ldap_authenticate {
       filter => "(".$rowldap[6]."=%s)"
     );
     my $method = $r->method;
+    $r->warn("LDAP authenticate: $redmine_user");
     if ($ldap->authenticate($redmine_user, $redmine_pass)) {
       $ret = 1;
     }
