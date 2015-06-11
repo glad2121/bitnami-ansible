@@ -2,7 +2,7 @@
 # roles/public/tasks/main.yml
 
 - name: make public dir
-  file: path={{ public_dir }} state=directory owner=daemon group=daemon
+  file: path={{ public_dir }} state=directory
 
 - name: create httpd-public.conf
   template:
@@ -15,3 +15,16 @@
     dest: "{{ bitnami_home }}/apache2/conf/httpd.conf"
     line: Include conf/extra/httpd-public.conf
   notify: restart bitnami-redmine
+
+- name: make dirs
+  file: path="{{ public_dir }}/{{ item }}" state=directory
+  with_items:
+    - yum
+
+- name: make symbolic links
+  file: src={{ item.src }} dest="{{ public_dir }}/{{ item.dest }}" state=link
+  with_items:
+    - src: /vagrant/downloads
+      dest: downloads
+    - src: /vagrant/repo
+      dest: yum/repo

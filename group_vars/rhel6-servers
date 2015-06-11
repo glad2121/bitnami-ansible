@@ -20,7 +20,7 @@ bitnami_path: "{{ bitnami_paths | join(':') }}"
 
 redmine_home: "{{ bitnami_home }}/apps/redmine/htdocs"
 
-public_dir: /var/opt/bitnami/public
+public_dir: /var/public
 
 ldap_enabled: false
 
