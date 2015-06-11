@@ -2,10 +2,10 @@
 # roles/jenkins/tasks/main.yml
 
 - name: copy jenkins rpm
-  copy: src={{ downloads_dir }}/{{ jenkins_rpm }} dest=/tmp/
+  copy: src={{ downloads_dir }}/{{ jenkins_rpm }} dest=/root/tmp/
 
 - name: install jenkins
-  yum: name=/tmp/{{ jenkins_rpm }} disablerepo=*
+  yum: name=/root/tmp/{{ jenkins_rpm }} disablerepo=*
 
 - name: change jenkins settings
   lineinfile: dest=/etc/sysconfig/jenkins
